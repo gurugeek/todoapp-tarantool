@@ -93,7 +93,7 @@ func createTodo(w http.ResponseWriter, r *http.Request) {
 
 	rnd.JSON(w, http.StatusCreated, renderer.M{
 		"message": "Todo created successfully",
-		"todo_id": tm.ID,
+		"id": tm.ID,
 	})
 }
 
