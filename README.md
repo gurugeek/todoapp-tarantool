@@ -1,1 +1,1 @@
-# todoapp-tarantool
+# Todo App with Go and Tarantool DB
