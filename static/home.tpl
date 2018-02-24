@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>Todo</title>
+    <title>todo.lol</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -70,13 +70,13 @@
       }
       @media screen and (max-width: 780px) {
         .card{
-            font-size: 15px;
+            font-size: 23px;
         }
         .todo-title{
-            font-size: 20px;
+            font-size: 30px;
         }
         .custom-input{
-            font-size: 15px;
+            font-size: 23px;
         }
       }
     </style>
