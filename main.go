@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"log"
-	"math"
 	"math/rand"
 	"net/http"
 	"os"
@@ -168,20 +167,10 @@ func fetchTodos(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	var q tarantool.Query
-	if name != "" {
-		q = &tarantool.Select{
-			Space: collectionName,
-			Index: "owner",
-			Key:   name,
-		}
-	} else {
-		q = &tarantool.Select{
-			Space:    collectionName,
-			Index:    "created",
-			Key:      uint64(math.MaxUint64),
-			Iterator: tarantool.IterLe,
-		}
+	q := &tarantool.Select{
+		Space: collectionName,
+		Index: "owner",
+		Key:   name,
 	}
 
 	resp, err := con.Execute(q)
@@ -204,11 +193,9 @@ func fetchTodos(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if name != "" {
-		sort.Slice(todoList, func(i, j int) bool {
-			return todoList[i].CreatedAt.Unix() > todoList[j].CreatedAt.Unix()
-		})
-	}
+	sort.Slice(todoList, func(i, j int) bool {
+		return todoList[i].CreatedAt.Unix() > todoList[j].CreatedAt.Unix()
+	})
 
 	rnd.JSON(w, http.StatusOK, renderer.M{
 		"data": todoList,
