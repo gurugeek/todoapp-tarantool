@@ -84,7 +84,7 @@
   <body>
     <div class="container" id="root">
         <div class="row">
-            <div class="col-6 offset-3">
+            <div class="col-md-6 offset-md-3">
                 <br><br>
                 <div class="card">
                   <div class="todo-title">
