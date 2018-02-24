@@ -16,8 +16,8 @@
           text-decoration: line-through;
       }
       .card{
-	         font: 14px "Giant Background A", "Giant Background B";
-	           font-size: 30px;
+	    font: 14px "Giant Background A", "Giant Background B";
+	    font-size: 30px;
         border-radius: 0 !important;
         border: none;
       }
@@ -40,7 +40,7 @@
         border-radius: 0 !important;
         padding: 10px 10px !important;
         border-bottom: none;
-         font-size: 30px;
+        font-size: 30px;
       }
       .custom-input:focus, .custom-input:active{
         box-shadow: none !important;
@@ -67,6 +67,17 @@
         background: #01ABAA;
         color: #FFF;
         font-weight: bold;
+      }
+      @media screen and (max-width: 780px) {
+        .card{
+            font-size: 15px;
+        }
+        .todo-title{
+            font-size: 20px;
+        }
+        .custom-input{
+            font-size: 15px;
+        }
       }
     </style>
   </head>
