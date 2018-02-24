@@ -11,6 +11,7 @@ type (
 		Title     string    `json:"title"`
 		Completed bool      `json:"completed"`
 		CreatedAt time.Time `json:"created_at"`
+		Owner     string    `json:"owner"`
 	}
 )
 
@@ -20,11 +21,12 @@ func (m *todoModel) Pack() []interface{} {
 	out = append(out, m.Title)
 	out = append(out, m.Completed)
 	out = append(out, m.CreatedAt.Unix())
+	out = append(out, m.Owner)
 	return out
 }
 
 func (m *todoModel) Unpack(data []interface{}) error {
-	if len(data) != 4 {
+	if len(data) != 5 {
 		return errors.New("bad data length")
 	}
 
@@ -45,11 +47,16 @@ func (m *todoModel) Unpack(data []interface{}) error {
 		return errors.New("can't convert todo.Completed")
 	}
 
-	t, err := data[3].(int64)
+	t, err := data[3].(uint64)
 	if !err {
 		return errors.New("can't convert todo.CreatedAt")
 	}
-	m.CreatedAt = time.Unix(t, 0)
+	m.CreatedAt = time.Unix(int64(t), 0)
+
+	m.Owner, err = data[4].(string)
+	if !err {
+		return errors.New("can't convert todo.Owner")
+	}
 
 	return nil
 }

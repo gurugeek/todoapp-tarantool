@@ -17,6 +17,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/thedevsaddam/renderer"
 	"github.com/viciious/go-tarantool"
+	"sort"
 )
 
 var rnd *renderer.Render
@@ -42,7 +43,8 @@ func init() {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	err := rnd.Template(w, http.StatusOK, []string{"static/home.tpl"}, nil)
+	name := chi.URLParam(r, "name")
+	err := rnd.Template(w, http.StatusOK, []string{"static/home.tpl"}, map[string]string{"Name": name})
 	checkErr(err)
 }
 
@@ -68,6 +70,7 @@ func createTodo(w http.ResponseWriter, r *http.Request) {
 		Title:     t.Title,
 		Completed: false,
 		CreatedAt: time.Now(),
+		Owner:     t.Owner,
 	}
 
 	con, err := db.Connect()
@@ -84,6 +87,7 @@ func createTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := con.Execute(q); err != nil {
+		log.Println(err)
 		rnd.JSON(w, http.StatusInternalServerError, renderer.M{
 			"message": "Failed to save todo",
 			"error":   err,
@@ -93,7 +97,7 @@ func createTodo(w http.ResponseWriter, r *http.Request) {
 
 	rnd.JSON(w, http.StatusCreated, renderer.M{
 		"message": "Todo created successfully",
-		"id": tm.ID,
+		"id":      tm.ID,
 	})
 }
 
@@ -154,6 +158,8 @@ func updateTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchTodos(w http.ResponseWriter, r *http.Request) {
+	name := chi.URLParam(r, "name")
+
 	con, err := db.Connect()
 	if err != nil {
 		rnd.JSON(w, http.StatusBadRequest, renderer.M{
@@ -162,11 +168,20 @@ func fetchTodos(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	q := &tarantool.Select{
-		Space:    collectionName,
-		Index:    "created",
-		Key:      uint64(math.MaxUint64),
-		Iterator: tarantool.IterLe,
+	var q tarantool.Query
+	if name != "" {
+		q = &tarantool.Select{
+			Space: collectionName,
+			Index: "owner",
+			Key:   name,
+		}
+	} else {
+		q = &tarantool.Select{
+			Space:    collectionName,
+			Index:    "created",
+			Key:      uint64(math.MaxUint64),
+			Iterator: tarantool.IterLe,
+		}
 	}
 
 	resp, err := con.Execute(q)
@@ -184,9 +199,15 @@ func fetchTodos(w http.ResponseWriter, r *http.Request) {
 		m := todoModel{}
 		err := m.Unpack(t)
 
-		if err != nil {
+		if err == nil {
 			todoList = append(todoList, m)
 		}
+	}
+
+	if name != "" {
+		sort.Slice(todoList, func(i, j int) bool {
+			return todoList[i].CreatedAt.Unix() > todoList[j].CreatedAt.Unix()
+		})
 	}
 
 	rnd.JSON(w, http.StatusOK, renderer.M{
@@ -240,6 +261,7 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Get("/", homeHandler)
+	r.Get("/{name}", homeHandler)
 
 	r.Mount("/todo", todoHandlers())
 
@@ -270,6 +292,7 @@ func todoHandlers() http.Handler {
 	rg := chi.NewRouter()
 	rg.Group(func(r chi.Router) {
 		r.Get("/", fetchTodos)
+		r.Get("/{name}", fetchTodos)
 		r.Post("/", createTodo)
 		r.Put("/{id}", updateTodo)
 		r.Delete("/{id}", deleteTodo)

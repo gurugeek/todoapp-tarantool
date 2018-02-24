@@ -113,13 +113,14 @@
         el: '#root',
         delimiters: ['@{', '}'],
         data: {
+          name: {{ .Name }},
           showError: false,
           enableEdit: false,
           todo: {id: '', title: '', completed: false},
           todos: []
         },
         mounted () {
-          this.$http.get('todo').then(response => {
+          this.$http.get('todo/'+this.name).then(response => {
             this.todos = response.body.data;
           });
         },
@@ -138,7 +139,7 @@
                 this.todo = {id: '', title: '', completed: false};
                 this.enableEdit = false;
               }else{
-                this.$http.post('todo', {title: this.todo.title}).then(response => {
+                this.$http.post('todo', {title: this.todo.title, owner: this.name}).then(response => {
                   if(response.status == 201){
                     this.todos = [{id: response.body.id, title: this.todo.title, completed: false}, ...this.todos];
                     this.todo = {id: '', title: '', completed: false};
