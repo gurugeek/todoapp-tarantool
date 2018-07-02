@@ -1,8 +1,8 @@
 ---
---- Created by a.mayorskiy.
---- DateTime: 23.02.18 20:00
+---gurugeek 2 July 2018
 ---
 
+box.cfg {}
 if box.space.todo == nil then
     box.schema.create_space('todo')
     box.space.todo:format({{name='id', type='unsigned'}, {name='title', type='string'}, {name='completed', type='boolean'}, {name='created', type='integer'},{name='owner', type='string'}})
